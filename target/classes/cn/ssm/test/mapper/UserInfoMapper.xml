@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cc.ez.rebook.common.dao.UserInfoMapper" >
+  <resultMap id="BaseResultMap" type="cn.ssm.test.domain.UserInfo" >
+    <id column="ID" property="id" jdbcType="INTEGER" />
+    <result column="userCd" property="usercd" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="spell" property="spell" jdbcType="VARCHAR" />
+    <result column="userName" property="username" jdbcType="VARCHAR" />
+    <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+    <result column="question" property="question" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="SMALLINT" />
+    <result column="birthday" property="birthday" jdbcType="BIGINT" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="SMALLINT" />
+    <result column="isVIP" property="isvip" jdbcType="SMALLINT" />
+    <result column="type" property="type" jdbcType="SMALLINT" />
+    <result column="userIco" property="userico" jdbcType="VARCHAR" />
+    <result column="credit" property="credit" jdbcType="INTEGER" />
+    <result column="identityNo" property="identityno" jdbcType="VARCHAR" />
+    <result column="rb_userInfo.createDate" property="createdate" jdbcType="BIGINT" />
+    <result column="rb_userInfo.creatorCd" property="creatorcd" jdbcType="VARCHAR" />
+    <result column="rb_userInfo.updateDate" property="updatedate" jdbcType="BIGINT" />
+    <result column="rb_userInfo.updatorCd" property="updatorcd" jdbcType="VARCHAR" />
+    <result column="rb_userInfo.remark" property="remark" jdbcType="VARCHAR" />
+    <result column="rb_userInfo.prep1" property="prep1" jdbcType="VARCHAR" />
+    <result column="qqnumber" property="qqnumber" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, userCd, name, spell, userName, pwd, question, password, email, phone, sex, birthday, 
+    address, status, isVIP, type, userIco, credit, identityNo, rb_userInfo.createDate, rb_userInfo.creatorCd, 
+    rb_userInfo.updateDate, rb_userInfo.updatorCd, rb_userInfo.remark, rb_userInfo.prep1,rb_userInfo.qqnumber
+  </sql>
+  
+  <sql id="Vo_Column_List" >
+    userCd, name, userName, pwd, email, phone, sex, birthday, 
+    address, status, isVIP, type, userIco, credit,qqnumber,remark,prep1
+  </sql>
+  
+  <!-- 查询指定状态的用户记录数 -->
+  <select id="selectTotalUser" resultType="java.lang.Integer" >
+    select count(userCd)
+    from rb_userInfo
+    where status = #{status,jdbcType=INTEGER}
+    <if test="username != null" >
+        and userName like CONCAT('%',#{username,jdbcType=VARCHAR},'%' )
+    </if>
+  </select>
+  
+  <!-- 查询指定状态的用户list -->
+  <select id="selectUser" resultType="cn.ssm.test.vo.UserVO" >
+    select
+    <include refid="Vo_Column_List" />
+    from rb_userInfo
+    where status = #{status,jdbcType=INTEGER}
+    <if test="username != null" >
+       and userName like CONCAT('%',#{username,jdbcType=VARCHAR},'%' )
+    </if>
+    order by updateDate desc
+    limit #{pagevo.startIndex},#{pagevo.pageSize}
+  </select>
+  
+  <!-- 根据userCd查询改用户关注的用户总记录数 -->
+  <select id="selectUserByUserCd" resultType="java.lang.Integer" parameterType="java.lang.String" >
+    select count(userCd)
+    from rb_userInfo
+    where rb_userInfo.userCd in (
+    	select aboutCd from rb_like 
+		where rb_like.creatorCd=#{userCd,jdbcType=VARCHAR}
+		and likeType='2'
+    ) 
+  </select>
+  
+  <!-- 根据userCd查询改用户关注的用户List -->
+  <select id="selectUserByUserCdAndPageVo" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from rb_userInfo
+    where rb_userInfo.userCd in (
+    	select aboutCd from rb_like 
+		where rb_like.creatorCd=#{userCd,jdbcType=VARCHAR}
+		and likeType='2'
+    )
+    limit #{pagevo.startIndex},#{pagevo.pageSize}
+  </select>
+  
+  <!-- 更新by userCd -->
+  <update id="updateByCdSelective" parameterType="cn.ssm.test.domain.UserInfo" >
+    update rb_userInfo
+    <set >
+      <if test="usercd != null" >
+        userCd = #{usercd,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="spell != null" >
+        spell = #{spell,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null" >
+        userName = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null" >
+        pwd = #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="question != null" >
+        question = #{question,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=SMALLINT},
+      </if>
+      <if test="birthday != null" >
+        birthday = #{birthday,jdbcType=BIGINT},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=SMALLINT},
+      </if>
+      <if test="isvip != null" >
+        isVIP = #{isvip,jdbcType=SMALLINT},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=SMALLINT},
+      </if>
+      <if test="userico != null" >
+        userIco = #{userico,jdbcType=VARCHAR},
+      </if>
+      <if test="credit != null" >
+        credit = #{credit,jdbcType=INTEGER},
+      </if>
+      <if test="identityno != null" >
+        identityNo = #{identityno,jdbcType=VARCHAR},
+      </if>
+      <if test="createdate != null" >
+        createDate = #{createdate,jdbcType=BIGINT},
+      </if>
+      <if test="creatorcd != null" >
+        creatorCd = #{creatorcd,jdbcType=VARCHAR},
+      </if>
+      <if test="updatedate != null" >
+        updateDate = #{updatedate,jdbcType=BIGINT},
+      </if>
+      <if test="updatorcd != null" >
+        updatorCd = #{updatorcd,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="prep1 != null" >
+        prep1 = #{prep1,jdbcType=VARCHAR},
+      </if>
+      <if test="qqnumber != null" >
+        qqnumber = #{qqnumber,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where userCd = #{usercd,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 根据userCd查询对应用户信息 -->
+  <select id="selectUserByCd" resultType="cn.ssm.test.vo.UserVO" parameterType="java.lang.String" >
+    select
+    <include refid="Vo_Column_List" />
+    from rb_userInfo
+    where userCd = #{userCd,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 根据userName和pwd查询对应用户信息 -->
+  <select id="selectUserByNmAndPsd" resultType="cn.ssm.test.vo.UserVO">
+    select
+    <include refid="Vo_Column_List" />
+    from rb_userInfo
+    where userCd = #{usercd,jdbcType=VARCHAR} and pwd = #{pwd,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 根据goodsCd查询对应用户信息 -->
+  <select id="selectByGoodsCd" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from rb_userInfo
+    left join rb_goods on rb_goods.creatorCd = rb_userInfo.userCd
+    where rb_goods.goodsCd = #{goodsCd,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 根据applyCd查询对应用户信息 -->
+  <select id="selectByApplyCd" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from rb_userInfo
+    left join rb_ex_apply on rb_ex_apply.creatorCd = rb_userInfo.userCd
+    where rb_ex_apply.applyCd = #{applyCd,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from rb_userInfo
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from rb_userInfo
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.ssm.test.domain.UserInfo" >
+    insert into rb_userInfo (ID, userCd, name, 
+      spell, userName, pwd, 
+      question, password, email, 
+      phone, sex, birthday, 
+      address, status, isVIP, 
+      type, userIco, credit, 
+      identityNo, createDate, creatorCd, 
+      updateDate, updatorCd, remark, 
+      prep1, qqnumber)
+    values (#{id,jdbcType=INTEGER}, #{usercd,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{spell,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, #{pwd,jdbcType=VARCHAR}, 
+      #{question,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
+      #{phone,jdbcType=VARCHAR}, #{sex,jdbcType=SMALLINT}, #{birthday,jdbcType=BIGINT}, 
+      #{address,jdbcType=VARCHAR}, #{status,jdbcType=SMALLINT}, #{isvip,jdbcType=SMALLINT}, 
+      #{type,jdbcType=SMALLINT}, #{userico,jdbcType=VARCHAR}, #{credit,jdbcType=INTEGER}, 
+      #{identityno,jdbcType=VARCHAR}, #{createdate,jdbcType=BIGINT}, #{creatorcd,jdbcType=VARCHAR}, 
+      #{updatedate,jdbcType=BIGINT}, #{updatorcd,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, 
+      #{prep1,jdbcType=VARCHAR}, #{qqnumber,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.ssm.test.domain.UserInfo" >
+    insert into rb_userInfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="usercd != null" >
+        userCd,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="spell != null" >
+        spell,
+      </if>
+      <if test="username != null" >
+        userName,
+      </if>
+      <if test="pwd != null" >
+        pwd,
+      </if>
+      <if test="question != null" >
+        question,
+      </if>
+      <if test="password != null" >
+        password,
+      </if>
+      <if test="email != null" >
+        email,
+      </if>
+      <if test="phone != null" >
+        phone,
+      </if>
+      <if test="sex != null" >
+        sex,
+      </if>
+      <if test="birthday != null" >
+        birthday,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="isvip != null" >
+        isVIP,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="userico != null" >
+        userIco,
+      </if>
+      <if test="credit != null" >
+        credit,
+      </if>
+      <if test="identityno != null" >
+        identityNo,
+      </if>
+      <if test="createdate != null" >
+        createDate,
+      </if>
+      <if test="creatorcd != null" >
+        creatorCd,
+      </if>
+      <if test="updatedate != null" >
+        updateDate,
+      </if>
+      <if test="updatorcd != null" >
+        updatorCd,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="prep1 != null" >
+        prep1,
+      </if>
+      <if test="qqnumber != null" >
+        qqnumber,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="usercd != null" >
+        #{usercd,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="spell != null" >
+        #{spell,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null" >
+        #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="question != null" >
+        #{question,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        #{sex,jdbcType=SMALLINT},
+      </if>
+      <if test="birthday != null" >
+        #{birthday,jdbcType=BIGINT},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=SMALLINT},
+      </if>
+      <if test="isvip != null" >
+        #{isvip,jdbcType=SMALLINT},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=SMALLINT},
+      </if>
+      <if test="userico != null" >
+        #{userico,jdbcType=VARCHAR},
+      </if>
+      <if test="credit != null" >
+        #{credit,jdbcType=INTEGER},
+      </if>
+      <if test="identityno != null" >
+        #{identityno,jdbcType=VARCHAR},
+      </if>
+      <if test="createdate != null" >
+        #{createdate,jdbcType=BIGINT},
+      </if>
+      <if test="creatorcd != null" >
+        #{creatorcd,jdbcType=VARCHAR},
+      </if>
+      <if test="updatedate != null" >
+        #{updatedate,jdbcType=BIGINT},
+      </if>
+      <if test="updatorcd != null" >
+        #{updatorcd,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="prep1 != null" >
+        #{prep1,jdbcType=VARCHAR},
+      </if>
+      <if test="qqnumber != null" >
+        #{qqnumber,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.ssm.test.domain.UserInfo" >
+    update rb_userInfo
+    <set >
+      <if test="usercd != null" >
+        userCd = #{usercd,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="spell != null" >
+        spell = #{spell,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null" >
+        userName = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null" >
+        pwd = #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="question != null" >
+        question = #{question,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=SMALLINT},
+      </if>
+      <if test="birthday != null" >
+        birthday = #{birthday,jdbcType=BIGINT},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=SMALLINT},
+      </if>
+      <if test="isvip != null" >
+        isVIP = #{isvip,jdbcType=SMALLINT},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=SMALLINT},
+      </if>
+      <if test="userico != null" >
+        userIco = #{userico,jdbcType=VARCHAR},
+      </if>
+      <if test="credit != null" >
+        credit = #{credit,jdbcType=INTEGER},
+      </if>
+      <if test="identityno != null" >
+        identityNo = #{identityno,jdbcType=VARCHAR},
+      </if>
+      <if test="createdate != null" >
+        createDate = #{createdate,jdbcType=BIGINT},
+      </if>
+      <if test="creatorcd != null" >
+        creatorCd = #{creatorcd,jdbcType=VARCHAR},
+      </if>
+      <if test="updatedate != null" >
+        updateDate = #{updatedate,jdbcType=BIGINT},
+      </if>
+      <if test="updatorcd != null" >
+        updatorCd = #{updatorcd,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="prep1 != null" >
+        prep1 = #{prep1,jdbcType=VARCHAR},
+      </if>
+      <if test="qqnumber != null" >
+        qqnumber = #{qqnumber,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="cn.ssm.test.domain.UserInfo" >
+    update rb_userInfo
+    set userCd = #{usercd,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      spell = #{spell,jdbcType=VARCHAR},
+      userName = #{username,jdbcType=VARCHAR},
+      pwd = #{pwd,jdbcType=VARCHAR},
+      question = #{question,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=SMALLINT},
+      birthday = #{birthday,jdbcType=BIGINT},
+      address = #{address,jdbcType=VARCHAR},
+      status = #{status,jdbcType=SMALLINT},
+      isVIP = #{isvip,jdbcType=SMALLINT},
+      type = #{type,jdbcType=SMALLINT},
+      userIco = #{userico,jdbcType=VARCHAR},
+      credit = #{credit,jdbcType=INTEGER},
+      identityNo = #{identityno,jdbcType=VARCHAR},
+      createDate = #{createdate,jdbcType=BIGINT},
+      creatorCd = #{creatorcd,jdbcType=VARCHAR},
+      updateDate = #{updatedate,jdbcType=BIGINT},
+      updatorCd = #{updatorcd,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      prep1 = #{prep1,jdbcType=VARCHAR},
+      qqnumber = #{qqnumber,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.ssm.test.domain.UserInfo" >
+    update rb_userInfo
+    set userCd = #{usercd,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      spell = #{spell,jdbcType=VARCHAR},
+      userName = #{username,jdbcType=VARCHAR},
+      pwd = #{pwd,jdbcType=VARCHAR},
+      question = #{question,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=SMALLINT},
+      birthday = #{birthday,jdbcType=BIGINT},
+      address = #{address,jdbcType=VARCHAR},
+      status = #{status,jdbcType=SMALLINT},
+      isVIP = #{isvip,jdbcType=SMALLINT},
+      type = #{type,jdbcType=SMALLINT},
+      userIco = #{userico,jdbcType=VARCHAR},
+      credit = #{credit,jdbcType=INTEGER},
+      identityNo = #{identityno,jdbcType=VARCHAR},
+      createDate = #{createdate,jdbcType=BIGINT},
+      creatorCd = #{creatorcd,jdbcType=VARCHAR},
+      updateDate = #{updatedate,jdbcType=BIGINT},
+      updatorCd = #{updatorcd,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      prep1 = #{prep1,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+<!--             扩展方法                                              -->
+<!-- 根据goodsCd查询对应卖家信息 -->
+  <select id="selectByUsername" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from rb_userInfo
+    where username = #{username,jdbcType=VARCHAR} and status=1
+  </select>
+
+
+<!--             扩展结束                                              -->
+  
+</mapper>

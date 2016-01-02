@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+	<!-- 加载配置文件 -->
+	
+	<!-- 項目自定义的Realm -->
+    <bean id="shiroDbRealm" class="cc.ez.rebook.shiro.realm.ShiroDbRealm" ></bean>
+	
+	<bean id="securityManager"
+        class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="shiroDbRealm" />
+    </bean>
+	
+	<!-- Shiro Filter -->
+    <bean id="shiroFilter"
+        class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager" />
+        <property name="loginUrl" value="/inner/login.jsp" />
+        <property name="successUrl" value="/inner/main.jsp" />
+        <property name="unauthorizedUrl" value="/error.jsp" />
+        <property name="filterChainDefinitions">
+            <value>
+            /inner/login.jsp = anon
+            /inner/login = anon
+            /inner/** = authc
+            /** = anon
+            </value>
+        </property>
+    </bean>
+    
+   <!-- 开启Shiro注解的Spring配置方式的beans。在lifecycleBeanPostProcessor之后运行 -->
+    <bean
+        class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+        depends-on="lifecycleBeanPostProcessor" />
+    <bean
+        class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager" />
+    </bean>
+    
+    <bean id="lifecycleBeanPostProcessor"
+        class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+    <!-- shiro为集成spring -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                <prop key="org.apache.shiro.authz.UnauthorizedException">/error.jsp</prop>
+            </props>
+        </property>
+    </bean>
+</beans>
